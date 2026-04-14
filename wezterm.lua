@@ -30,7 +30,11 @@ config.font_size = 12.0
 config.use_ime = true
 
 -- レンダリング設定
-config.front_end = "Software"
+config.front_end = "WebGpu"
+config.webgpu_preferred_adapter = {
+  backend = "Dx12",
+  device_type = "IntegratedGpu",
+}
 
 -- 背景設定
 config.window_background_opacity = 0.75
