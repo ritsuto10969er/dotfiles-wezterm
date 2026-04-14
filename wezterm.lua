@@ -31,10 +31,7 @@ config.use_ime = true
 
 -- レンダリング設定
 config.front_end = "WebGpu"
-config.webgpu_preferred_adapter = {
-  backend = "Dx12",
-  device_type = "IntegratedGpu",
-}
+config.webgpu_power_preference = "LowPower"
 
 -- 背景設定
 config.window_background_opacity = 0.75
