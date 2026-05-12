@@ -8,7 +8,7 @@ local act = wezterm.action
 -- 現在のディレクトリを保持してPaneを分割
 local function split_pane_with_cwd(window, pane, split_action)
   local cwd_uri = pane:get_current_working_dir()
-  local cwd_path = ""
+  local cwd_path = nil
 
   if cwd_uri then
     cwd_path = cwd_uri.file_path
@@ -17,24 +17,11 @@ local function split_pane_with_cwd(window, pane, split_action)
   window:perform_action(
     split_action({
       domain = "CurrentPaneDomain",
-      args = { "wsl.exe", "--cd", cwd_path },
+      cwd = cwd_path,
     }),
     pane
   )
 end
-
-----------------------------------------------------
--- Event Handlers
-----------------------------------------------------
-
--- アクティブなキーテーブルをステータスエリアに表示
-wezterm.on("update-right-status", function(window, pane)
-  local name = window:active_key_table()
-  if name then
-    name = "TABLE: " .. name
-  end
-  window:set_right_status(name or "")
-end)
 
 ----------------------------------------------------
 -- Key Bindings
@@ -87,10 +74,10 @@ return {
     -- Command Palette & System
     ----------------------------------------------------
     { key = "p", mods = "LEADER", action = act.ActivateCommandPalette },
-    { key = "p", mods = "SHIFT|CTRL", action = act.ActivateCommandPalette },
-    { key = "r", mods = "SHIFT|CTRL", action = act.ReloadConfiguration },
-    { key = "q", mods = "CTRL|SHIFT", action = act.QuitApplication },
-    { key = "Enter", mods = "ALT", action = act.ToggleFullScreen },
+    { key = "p", mods = "SUPER|SHIFT", action = act.ActivateCommandPalette },
+    { key = "r", mods = "SUPER", action = act.ReloadConfiguration },
+    { key = "q", mods = "SUPER", action = act.QuitApplication },
+    { key = "Enter", mods = "SUPER", action = act.ToggleFullScreen },
 
     ----------------------------------------------------
     -- Tab
@@ -108,8 +95,8 @@ return {
     { key = "8", mods = "LEADER", action = act.ActivateTab(7) },
     { key = "9", mods = "LEADER", action = act.ActivateTab(-1) },
     -- Tab操作
-    { key = "t", mods = "CTRL", action = act({ SpawnTab = "CurrentPaneDomain" }) },
-    { key = "w", mods = "CTRL", action = act({ CloseCurrentTab = { confirm = true } }) },
+    { key = "t", mods = "SUPER", action = act({ SpawnTab = "CurrentPaneDomain" }) },
+    { key = "w", mods = "SUPER", action = act({ CloseCurrentTab = { confirm = true } }) },
     { key = "{", mods = "LEADER", action = act({ MoveTabRelative = -1 }) },
     { key = "}", mods = "LEADER", action = act({ MoveTabRelative = 1 }) },
 
@@ -117,9 +104,9 @@ return {
     -- Copy & Paste
     ----------------------------------------------------
     { key = "[", mods = "LEADER", action = act.ActivateCopyMode },
-    { key = "c", mods = "CTRL|SHIFT", action = act.CopyTo("Clipboard") },
+    { key = "c", mods = "SUPER", action = act.CopyTo("Clipboard") },
     { key = "v", mods = "LEADER", action = act.PasteFrom("Clipboard") },
-    { key = "v", mods = "CTRL|SHIFT", action = act.PasteFrom("Clipboard") },
+    { key = "v", mods = "SUPER", action = act.PasteFrom("Clipboard") },
 
     ----------------------------------------------------
     -- Pane
@@ -148,7 +135,7 @@ return {
     -- Pane操作
     { key = "x", mods = "LEADER", action = act({ CloseCurrentPane = { confirm = true } }) },
     { key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
-    { key = "[", mods = "CTRL|SHIFT", action = act.PaneSelect },
+    { key = "[", mods = "SUPER|SHIFT", action = act.PaneSelect },
     -- Paneモード
     { key = "s", mods = "LEADER", action = act.ActivateKeyTable({ name = "resize_pane", one_shot = false }) },
     {
@@ -160,9 +147,14 @@ return {
     ----------------------------------------------------
     -- Font
     ----------------------------------------------------
-    { key = "+", mods = "CTRL", action = act.IncreaseFontSize },
-    { key = "-", mods = "CTRL", action = act.DecreaseFontSize },
-    { key = "0", mods = "CTRL", action = act.ResetFontSize },
+    { key = "+", mods = "SUPER", action = act.IncreaseFontSize },
+    { key = "-", mods = "SUPER", action = act.DecreaseFontSize },
+    { key = "0", mods = "SUPER", action = act.ResetFontSize },
+
+    ----------------------------------------------------
+    -- QuickSelect
+    ----------------------------------------------------
+    { key = "Space", mods = "SUPER", action = act.QuickSelect },
 
     ----------------------------------------------------
     -- Cheatsheet
@@ -174,11 +166,9 @@ return {
       action = act.SplitVertical({
         domain = "CurrentPaneDomain",
         args = {
-          "powershell",
-          "-NoLogo",
-          "-NoExit",
-          "-Command",
-          "bat $env:USERPROFILE\\.config\\wezterm\\wezterm-cheatsheet.md",
+          "bash",
+          "-c",
+          "bat ~/.config/wezterm/wezterm-cheatsheet.md 2>/dev/null || cat ~/.config/wezterm/wezterm-cheatsheet.md; read -r",
         },
       }),
     },
