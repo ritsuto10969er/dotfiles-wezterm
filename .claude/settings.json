@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/ritsutokosaka/.config/wezterm && if ! git diff --quiet || ! git diff --staged --quiet; then git add -A && git commit -m 'chore: auto-sync wezterm config' && git push; fi",
+            "timeout": 30,
+            "statusMessage": "wezterm設定をGitHubに同期中..."
+          }
+        ]
+      }
+    ]
+  }
+}
