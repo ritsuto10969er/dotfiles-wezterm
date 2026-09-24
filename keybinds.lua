@@ -76,7 +76,23 @@ return {
     { key = "p", mods = "LEADER", action = act.ActivateCommandPalette },
     { key = "p", mods = "SUPER|SHIFT", action = act.ActivateCommandPalette },
     { key = "r", mods = "SUPER", action = act.ReloadConfiguration },
-    { key = "q", mods = "SUPER", action = act.QuitApplication },
+    {
+      -- WezTermを終了（必ず確認を挟む）
+      key = "q",
+      mods = "SUPER",
+      action = act.InputSelector({
+        title = "Quit WezTerm?",
+        choices = {
+          { id = "cancel", label = "Cancel" },
+          { id = "quit", label = "Quit WezTerm" },
+        },
+        action = wezterm.action_callback(function(window, pane, id, label)
+          if id == "quit" then
+            window:perform_action(act.QuitApplication, pane)
+          end
+        end),
+      }),
+    },
     { key = "Enter", mods = "SUPER", action = act.ToggleFullScreen },
 
     ----------------------------------------------------
